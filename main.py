@@ -2,11 +2,8 @@ import PyPDF2
 import ebooklib
 from ebooklib import epub
 import os
+import sys
 from bs4 import BeautifulSoup
-
-path = './SeasideScroll.epub'
-
-name, extension = os.path.splitext(path)
 
 blacklist = ['[document]', 'noscript', 'header', 'html', 'meta', 'head',
             'input', 'script']
@@ -37,15 +34,17 @@ def clean_text(txt):
 
 punc = ['“', '…', '”', '.', ',', '!', '?', '(', ')', '"', ';', '\n']
 def word_freq(text):
-    gs = ''
+    gstr = ''
     for x in text:
-        gs += x;
-    aps = ''
-    for l in gs:
-        aps += l
-    aps = aps.split(' ')
+        gstr += x;
+    apstr = ''
+    for l in gstr:
+        apstr += l
+    apstr = apstr.split(' ')
     cleaned = []
-    for word in aps:
+    for word in apstr:
+        word = word.lower()
+        
         for l in word:
             if l in punc: 
                 word = word.replace(l, '') 
@@ -60,13 +59,22 @@ def word_freq(text):
     srted = sorted(dic.items(), key =
              lambda kv:(kv[1], kv[0]))
     srted.reverse() 
-    print(srted)
+    for pair in srted:
+        print(pair[0] + ': ' + str(pair[1]))
 
-def main():
+def main(path):  
+    name, extension = os.path.splitext(path)
+
     if(extension == '.epub'): 
         chapters = epub2html(path)
-        ctext = clean_text(chapters)      
-         
+        ctext = clean_text(chapters)       
         word_freq(ctext)
+    elif(extension == '.pdf'):
+        pass
+    else:
+        print("Error: Not a valid extension")
 
-main()
+if(len(sys.argv) > 1):
+    main(sys.argv[1]);
+else:
+    print("Error: No path given")
